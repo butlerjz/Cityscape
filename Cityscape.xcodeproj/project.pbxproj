@@ -6,6 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		3B01F2C02EDD361B00FED5EC /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 3B01F2BF2EDD361B00FED5EC /* FirebaseAuth */; };
+		3B01F2C22EDD361B00FED5EC /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 3B01F2C12EDD361B00FED5EC /* FirebaseFirestore */; };
+		3B01F2C42EDD361B00FED5EC /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 3B01F2C32EDD361B00FED5EC /* FirebaseStorage */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		3B9F7C4C2E975BB60030C09E /* Cityscape.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cityscape.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +29,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3B01F2C02EDD361B00FED5EC /* FirebaseAuth in Frameworks */,
+				3B01F2C22EDD361B00FED5EC /* FirebaseFirestore in Frameworks */,
+				3B01F2C42EDD361B00FED5EC /* FirebaseStorage in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +74,9 @@
 			);
 			name = Cityscape;
 			packageProductDependencies = (
+				3B01F2BF2EDD361B00FED5EC /* FirebaseAuth */,
+				3B01F2C12EDD361B00FED5EC /* FirebaseFirestore */,
+				3B01F2C32EDD361B00FED5EC /* FirebaseStorage */,
 			);
 			productName = Cityscape;
 			productReference = 3B9F7C4C2E975BB60030C09E /* Cityscape.app */;
@@ -94,6 +106,9 @@
 			);
 			mainGroup = 3B9F7C432E975BB60030C09E;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				3B01F2BE2EDD361B00FED5EC /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3B9F7C4D2E975BB60030C09E /* Products */;
 			projectDirPath = "";
@@ -256,6 +271,7 @@
 				DEVELOPMENT_TEAM = LA7Q38KZFP;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Cityscape requires access to the device's location.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -288,6 +304,7 @@
 				DEVELOPMENT_TEAM = LA7Q38KZFP;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Cityscape requires access to the device's location.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -332,6 +349,35 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		3B01F2BE2EDD361B00FED5EC /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.6.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3B01F2BF2EDD361B00FED5EC /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3B01F2BE2EDD361B00FED5EC /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		3B01F2C12EDD361B00FED5EC /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3B01F2BE2EDD361B00FED5EC /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		3B01F2C32EDD361B00FED5EC /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3B01F2BE2EDD361B00FED5EC /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 3B9F7C442E975BB60030C09E /* Project object */;
 }
