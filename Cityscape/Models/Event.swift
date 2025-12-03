@@ -19,6 +19,7 @@ struct Event: Codable, Identifiable {
     var longitude = 0.0
     var latitude = 0.0
     var eventType = ""
+    var description: String?
 }
 
 extension Event {
@@ -33,7 +34,8 @@ extension Event {
             photo: nil,
             longitude: -71.044154694033,
             latitude: 42.3518324925221,
-            eventType: "PopUp"
+            eventType: "PopUp",
+            description: "A winter market in the heart of Boston's Seaport District"
         )
         return newEvent
     }

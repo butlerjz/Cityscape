@@ -48,7 +48,7 @@ struct DetailView: View {
             
             Spacer()
             
-            Text("End Date: ")
+            Text("End Date:")
                 .font(.title2)
                 .bold()
             Text("\(event.endDate)")
@@ -58,6 +58,13 @@ struct DetailView: View {
             if event.endTime != nil {
                 Text("End Time: \(event.endTime ?? Date())")
             }
+            
+            Text("Event Description:")
+                .font(.title2)
+                .bold()
+            
+            Text(event.description ?? "No description available for this event.")
+                .multilineTextAlignment(.leading)
             
             Spacer()
         }

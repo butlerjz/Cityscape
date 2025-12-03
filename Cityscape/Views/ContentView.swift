@@ -8,9 +8,11 @@
 import SwiftUI
 import MapKit
 import FirebaseAuth
+import FirebaseFirestore
 
 struct MapView: View {
     
+    @FirestoreQuery(collectionPath: "events") var events: [Event]
     @State private var defaultEnable = true
     @State private var showBottomSheet = true
     @State var locationManager = LocationManager()
@@ -22,20 +24,35 @@ struct MapView: View {
             
             ZStack {
                 
-                Map(position: $cameraPosition)
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button("Sign Out") {
-                                do {
-                                    try Auth.auth().signOut()
-                                    print("Sign out successful")
-                                    dismiss()
-                                } catch {
-                                    print("ERROR: Could not sign out")
-                                }
+                //TODO: incorporate Google Search Button
+                
+                Map(position: $cameraPosition) {
+                    ForEach(events) { event in
+                        Marker(coordinate: CLLocationCoordinate2D(latitude: event.latitude, longitude: event.longitude)) {
+                            Text(event.name)
+                        }
+                    }
+                    
+                    UserAnnotation()
+                }
+                .mapControls({
+                    MapUserLocationButton()
+                    MapCompass()
+                })
+                .mapStyle(.standard(pointsOfInterest: .including([.aquarium,.amusementPark,.beach,.bowling,.brewery,.museum,.zoo,.castle,.distillery,.landmark,.musicVenue,.publicTransport,.stadium,.winery])))
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Sign Out") {
+                            do {
+                                try Auth.auth().signOut()
+                                print("Sign out successful")
+                                dismiss()
+                            } catch {
+                                print("ERROR: Could not sign out")
                             }
                         }
                     }
+                }
             }
             .sheet(isPresented: $showBottomSheet) {
                 BottomSheetView()
@@ -65,6 +82,7 @@ struct MapView: View {
 
 struct BottomSheetView: View {
     
+    @FirestoreQuery(collectionPath: "events") var events: [Event]
     @State private var searchText = ""
     
     var body: some View {
@@ -90,14 +108,14 @@ struct BottomSheetView: View {
             
             // Main content of your sheet
             List {
-                Section(header: Text("Recent")) {
-                    ForEach(0..<10) { i in
+                Section(header: Text("Nearby Events")) {
+                    ForEach(events) { event in
                         HStack {
                             Image(systemName: "mappin.circle")
                             VStack(alignment: .leading) {
-                                Text("Place \(i + 1)")
+                                Text(event.name)
                                     .font(.headline)
-                                Text("Some address here")
+                                Text("\(event.endDate)")
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
                             }

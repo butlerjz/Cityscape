@@ -1,0 +1,36 @@
+# This .gitignore tells Git which files and folders to ignore.
+# Ignored files are:
+# - not tracked in your local .git history
+# - not committed
+# - not pushed to GitHub
+
+# API KEYS & SECRETS
+# Any files with sensitive info (API keys, tokens, passwords) go here.
+# Example: if your keys are in "Secrets.swift", add that line below.
+# IMPORTANT: Keep backups of your secrets in a safe place!
+Secrets.swift
+
+# PERSONAL XCODE SETTINGS
+# These store YOUR personal Xcode preferences - which files you had open,
+# window positions, breakpoints, etc. Everyone has different settings,
+# so committing these causes constant merge conflicts with your team.
+xcuserdata/
+*.xcuserstate
+
+# BUILD OUTPUTS & CACHE
+# Xcode generates these every time you build. They're huge (100s of MB),
+# change constantly, and are unnecessary to save permanently.
+build/
+DerivedData/
+
+# SWIFT PACKAGE MANAGER
+# If you use Swift Package Manager for dependencies:
+# - .build/  = compiled artifacts and cache (regenerated automatically)
+# - .swiftpm/ = SPM workspace/metadata (also regenerated as needed)
+# None of this needs to be committed.
+.build/
+.swiftpm/
+
+# MACOS SYSTEM FILES
+# Hidden file that macOS Finder creates - not part of your actual project.
+.DS_Store
