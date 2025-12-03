@@ -11,15 +11,15 @@ import FirebaseFirestore
 struct Event: Codable, Identifiable {
     @DocumentID var id: String?
     var name = ""
-    var startDate: Date
-    var endDate: Date
+    var startDate: Date = Date()
+    var endDate: Date = Date().addingTimeInterval(86400)
     var startTime: Date?
     var endTime: Date?
     var photo: Photo?
     var longitude = 0.0
     var latitude = 0.0
     var eventType = ""
-    var description: String?
+    var description: String = ""
 }
 
 extension Event {
@@ -28,7 +28,7 @@ extension Event {
             id: "1",
             name: "Snowport",
             startDate: Date(),
-            endDate: Date().addingTimeInterval(35000),
+            endDate: Date().addingTimeInterval(1000000),
             startTime: nil,
             endTime: nil,
             photo: nil,

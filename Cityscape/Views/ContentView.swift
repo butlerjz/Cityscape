@@ -14,7 +14,8 @@ struct MapView: View {
     
     @FirestoreQuery(collectionPath: "events") var events: [Event]
     @State private var defaultEnable = true
-    @State private var showBottomSheet = true
+    @State var showBottomSheet = true
+    @State var showCreateEventSheet = false
     @State var locationManager = LocationManager()
     @State private var cameraPosition: MapCameraPosition = .automatic
     @Environment(\.dismiss) private var dismiss
@@ -52,6 +53,14 @@ struct MapView: View {
                             }
                         }
                     }
+                    ToolbarItem(placement: .primaryAction) {
+                        Button {
+                            showBottomSheet.toggle()
+                            showCreateEventSheet.toggle()
+                        } label: {
+                            Image(systemName: "plus.circle")
+                        }
+                    }
                 }
             }
             .sheet(isPresented: $showBottomSheet) {
@@ -68,6 +77,11 @@ struct MapView: View {
                     .interactiveDismissDisabled()
                 // Allow interacting with the content behind the sheet
                     .presentationBackgroundInteraction(.enabled)
+            }
+            .sheet(isPresented: $showCreateEventSheet) {
+                NavigationStack {
+                    CustomEventView(event: Event())
+                }
             }
             .onAppear {
                 showBottomSheet = true
