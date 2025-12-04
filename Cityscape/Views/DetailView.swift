@@ -6,11 +6,13 @@
 //
 
 import SwiftUI
+import Firebase
 import FirebaseFirestore
 import FirebaseAuth
 
 struct DetailView: View {
     
+    @FirestoreQuery(collectionPath: "events") var photos: [Photo]
     @State var event: Event
     @Environment(\.dismiss) private var dismiss
     
@@ -28,10 +30,30 @@ struct DetailView: View {
                 .font(.title)
                 .foregroundStyle(.cyan)
             
-            Image(systemName: "plus") //TODO: change this to an image from firebase
-                .resizable()
-                .scaledToFit()
-                .padding()
+            if event.photo != nil {
+                ForEach(photos) { photo in
+                    if let url = URL(string: photo.imageURLString) {
+                        AsyncImage(url: url) { image in
+                            image
+                                .resizable()
+                                .scaledToFit()
+                                .padding()
+                        } placeholder: {
+                            ProgressView()
+                        }
+                    } else {
+                        Image(systemName: "photo")
+                            .resizable()
+                            .scaledToFit()
+                            .padding()
+                    }
+                }
+            } else {
+                Image(systemName: "plus") //shows if there is no photo
+                    .resizable()
+                    .scaledToFit()
+                    .padding()
+            }
             
             Spacer()
             
@@ -63,17 +85,15 @@ struct DetailView: View {
                 .font(.title2)
                 .bold()
             
-            Text(event.description ?? "No description available for this event.")
+            Text(event.description)
                 .multilineTextAlignment(.leading)
             
             Spacer()
         }
+        .task {
+            $photos.path = "events/\(event.id ?? "")/photos"
+        }
         .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-                Button("Cancel", systemImage: "xmark") {
-                    dismiss()
-                }
-            }
             
             ToolbarItem(placement: .confirmationAction) {
                 Button("Save", systemImage: "checkmark") {

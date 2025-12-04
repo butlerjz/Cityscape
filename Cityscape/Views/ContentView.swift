@@ -14,10 +14,11 @@ struct MapView: View {
     
     @FirestoreQuery(collectionPath: "events") var events: [Event]
     @State private var defaultEnable = true
-    @State var showBottomSheet = true
-    @State var showCreateEventSheet = false
+    @State private var showBottomSheet = true
+    @State private var showCreateEventSheet = false
     @State var locationManager = LocationManager()
-    @State private var cameraPosition: MapCameraPosition = .automatic
+    @State private var cameraPosition: MapCameraPosition = .userLocation(fallback: .automatic)
+    @State private var selectedEvent: Event?
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -25,13 +26,14 @@ struct MapView: View {
             
             ZStack {
                 
-                //TODO: incorporate Google Search Button
-                
-                Map(position: $cameraPosition) {
+                Map(position: $cameraPosition, selection: $selectedEvent) {
                     ForEach(events) { event in
-                        Marker(coordinate: CLLocationCoordinate2D(latitude: event.latitude, longitude: event.longitude)) {
-                            Text(event.name)
-                        }
+                        
+                        let coordinate = CLLocationCoordinate2D(latitude: event.latitude,
+                                                                longitude: event.longitude)
+                        
+                        Marker(event.name, coordinate: coordinate)
+                            .tag(event)
                     }
                     
                     UserAnnotation()
@@ -63,41 +65,69 @@ struct MapView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showBottomSheet) {
-                BottomSheetView()
-                // Heights: tweak these to match the feel you want
-                    .presentationDetents([
-                        .fraction(0.18),   // almost just a header
-                        .fraction(0.35),   // mid
-                        .large             // almost full-screen
-                    ])
-                // Show the little drag indicator at the top
-                    .presentationDragIndicator(.visible)
-                // Don't allow swiping down to fully dismiss
-                    .interactiveDismissDisabled()
-                // Allow interacting with the content behind the sheet
-                    .presentationBackgroundInteraction(.enabled)
+            .navigationDestination(item: $selectedEvent) { event in
+                DetailView(event: event)
             }
-            .sheet(isPresented: $showCreateEventSheet) {
+            .sheet(isPresented: $showBottomSheet) {
+                BottomSheetView { event in
+                    let coord = CLLocationCoordinate2D(latitude: event.latitude,
+                                                       longitude: event.longitude)
+                    
+                    withAnimation {
+                        cameraPosition = .region(
+                            MKCoordinateRegion(
+                                center: coord,
+                                latitudinalMeters: 1000,    // adjust zoom as desired
+                                longitudinalMeters: 1000
+                            )
+                        )
+                    }
+                }
+                // Heights: tweak these to match the feel you want
+                .presentationDetents([
+                    .fraction(0.18),   // almost just a header
+                    .fraction(0.35),   // mid
+                    .large             // almost full-screen
+                ])
+                // Show the little drag indicator at the top
+                .presentationDragIndicator(.visible)
+                // Don't allow swiping down to fully dismiss
+                .interactiveDismissDisabled()
+                // Allow interacting with the content behind the sheet
+                .presentationBackgroundInteraction(.enabled)
+            }
+            .sheet(isPresented: $showCreateEventSheet, onDismiss: {
+                showCreateEventSheet.toggle()
+                showBottomSheet.toggle()
+            }) {
                 NavigationStack {
                     CustomEventView(event: Event())
                 }
             }
+            .onChange(of: selectedEvent) { _, newValue in
+                if newValue != nil {
+                    // Navigated to DetailView, hide bottom sheet
+                    showBottomSheet = false
+                } else {
+                    // Returned from DetailView, show bottom sheet again
+                    showBottomSheet = true
+                }
+            }
             .onAppear {
                 showBottomSheet = true
-                if let region = locationManager.getRegionAroundCurrentLocation() {
-                    cameraPosition = .region(region)
                 }
             }
         }
     }
-}
+
 
 
 struct BottomSheetView: View {
     
     @FirestoreQuery(collectionPath: "events") var events: [Event]
     @State private var searchText = ""
+    /// Called when the user taps an event in the list
+    var onEventSelected: (Event) -> Void
     
     var body: some View {
         VStack(spacing: 12) {
@@ -133,6 +163,10 @@ struct BottomSheetView: View {
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
                             }
+                        }
+                        .contentShape(Rectangle()) // make whole row tappable
+                        .onTapGesture {
+                            onEventSelected(event)
                         }
                     }
                 }
