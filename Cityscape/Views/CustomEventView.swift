@@ -66,6 +66,11 @@ struct CustomEventView: View {
                         DatePicker("End", selection: $event.endDate)
                     }
                 }
+                .onChange(of: event.startDate) { _ , newValue in
+                    if newValue > event.endDate {
+                        event.endDate = newValue
+                    }
+                }
                 
                 // Photo picker
                 GroupBox("Photo") {
@@ -135,17 +140,23 @@ struct CustomEventView: View {
             ToolbarItem(placement: .confirmationAction) {
                 Button("Save", systemImage: "checkmark") {
                     Task {
-                        await PhotoViewModel.saveImage(event: event, photo: photo, data: data)
-                    }
-                    Task {
+                        // 1. Save the event first to get a valid event.id
                         let id = await EventViewModel.saveEvent(event: event)
-                        if id == nil {
-                            print("ERROR: Save on DetailView did not work")
-                        } else {
+                        if let id {
+                            // Ensure the local event has the same id that was saved in Firestore
+                            event.id = id
+
+                            // 2. Only attempt to save a photo if we actually have image data
+                            if !data.isEmpty {
+                                await PhotoViewModel.saveImage(event: event, photo: photo, data: data)
+                            }
+
+                            // 3. Dismiss once everything succeeds
                             dismiss()
+                        } else {
+                            print("ERROR: Save on CustomEventView did not work")
                         }
                     }
-                    dismiss()
                 }
             }
         }

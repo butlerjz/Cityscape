@@ -21,7 +21,7 @@ class PhotoViewModel {
         
         let storage = Storage.storage().reference()
         let metadata = StorageMetadata()
-        if photo.id != nil {
+        if photo.id == nil {
             photo.id = UUID().uuidString
         }
         metadata.contentType = "image/jpeg" // will allow image to be viewed in browser

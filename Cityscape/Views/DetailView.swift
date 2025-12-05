@@ -141,7 +141,11 @@ struct DetailView: View {
         .navigationTitle("Event Details")
         .navigationBarTitleDisplayMode(.inline)
         .task {
-            $photos.path = "events/\(event.id ?? "")/photos"
+            guard let id = event.id else {
+                print("New record - has no id")
+                return
+            }
+            $photos.path = "events/\(id)/photos"
         }
     }
 }

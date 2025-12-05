@@ -212,7 +212,7 @@ struct BottomSheetView: View {
                                     .foregroundStyle(Color("cityscapeSecondary"))
                                 Text("Until \(event.endDate.formatted(date: .abbreviated, time: .shortened))")
                                     .font(.subheadline)
-                                    .foregroundColor(.secondary)
+                                    .foregroundStyle(.secondary)
                             }
                         }
                         .contentShape(Rectangle()) // make whole row tappable
