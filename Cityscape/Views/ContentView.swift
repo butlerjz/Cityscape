@@ -16,6 +16,7 @@ struct MapView: View {
     @State private var defaultEnable = true
     @State private var showBottomSheet = true
     @State private var showCreateEventSheet = false
+    @State private var bottomSheetDetent: PresentationDetent = .fraction(0.35)
     @State var locationManager = LocationManager()
     @State private var cameraPosition: MapCameraPosition = .userLocation(fallback: .automatic)
     @State private var selectedEvent: Event?
@@ -32,9 +33,12 @@ struct MapView: View {
                         let coordinate = CLLocationCoordinate2D(latitude: event.latitude,
                                                                 longitude: event.longitude)
                         
-                        Marker(event.name, coordinate: coordinate)
+                        Marker(event.name,
+                               systemImage: event.eventType?.iconName ?? "mappin.circle",
+                               coordinate: coordinate)
                             .tag(event)
                     }
+                    .tint(Color("cityscapePrimary"))
                     
                     UserAnnotation()
                 }
@@ -69,7 +73,7 @@ struct MapView: View {
                 DetailView(event: event)
             }
             .sheet(isPresented: $showBottomSheet) {
-                BottomSheetView { event in
+                BottomSheetView(userLocation: locationManager.location?.coordinate) { event in
                     let coord = CLLocationCoordinate2D(latitude: event.latitude,
                                                        longitude: event.longitude)
                     
@@ -84,11 +88,10 @@ struct MapView: View {
                     }
                 }
                 // Heights: tweak these to match the feel you want
-                .presentationDetents([
-                    .fraction(0.18),   // almost just a header
-                    .fraction(0.35),   // mid
-                    .large             // almost full-screen
-                ])
+                .presentationDetents(
+                    [.fraction(0.18), .fraction(0.35), .large],
+                    selection: $bottomSheetDetent
+                )
                 // Show the little drag indicator at the top
                 .presentationDragIndicator(.visible)
                 // Don't allow swiping down to fully dismiss
@@ -126,6 +129,29 @@ struct BottomSheetView: View {
     
     @FirestoreQuery(collectionPath: "events") var events: [Event]
     @State private var searchText = ""
+    var userLocation: CLLocationCoordinate2D?
+    
+    private var sortedEvents: [Event] {
+        guard let userLocation else { return events }
+
+        let userLoc = CLLocation(latitude: userLocation.latitude,
+                                 longitude: userLocation.longitude)
+
+        return events.sorted { e1, e2 in
+            let loc1 = CLLocation(latitude: e1.latitude, longitude: e1.longitude)
+            let loc2 = CLLocation(latitude: e2.latitude, longitude: e2.longitude)
+            return userLoc.distance(from: loc1) < userLoc.distance(from: loc2)
+        }
+    }
+
+    private var visibleEvents: [Event] {
+        let base = sortedEvents
+        guard !searchText.isEmpty else { return base }
+        return base.filter { event in
+            event.name.localizedCaseInsensitiveContains(searchText)
+        }
+    }
+    
     /// Called when the user taps an event in the list
     var onEventSelected: (Event) -> Void
     
@@ -153,13 +179,15 @@ struct BottomSheetView: View {
             // Main content of your sheet
             List {
                 Section(header: Text("Nearby Events")) {
-                    ForEach(events) { event in
+                    ForEach(visibleEvents) { event in
                         HStack {
-                            Image(systemName: "mappin.circle")
+                            Image(systemName: event.eventType?.iconName ?? "mappin.circle")
+                                .foregroundStyle(Color("cityscapePrimary"))
                             VStack(alignment: .leading) {
                                 Text(event.name)
                                     .font(.headline)
-                                Text("\(event.endDate)")
+                                    .foregroundStyle(Color("cityscapeSecondary"))
+                                Text("Until \(event.endDate.formatted(date: .abbreviated, time: .shortened))")
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
                             }

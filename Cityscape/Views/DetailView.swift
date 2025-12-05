@@ -16,99 +16,132 @@ struct DetailView: View {
     @State var event: Event
     @Environment(\.dismiss) private var dismiss
     
+    private var startDateTimeText: String {
+        let date = event.startTime ?? event.startDate
+        return date.formatted(date: .abbreviated, time: .shortened)
+    }
+    
+    private var endDateTimeText: String {
+        let date = event.endTime ?? event.endDate
+        return date.formatted(date: .abbreviated, time: .shortened)
+    }
+    
     var body: some View {
-        VStack {
-            
-            Text("\(event.name)")
-                .frame(width: 200, height: 30)
-                .font(Font.largeTitle.bold())
-                .foregroundStyle(.blue)
-                .padding(.vertical)
-            
-            Text("\(event.eventType)")
-                .frame(width: 200, height: 10)
-                .font(.title)
-                .foregroundStyle(.cyan)
-            
-            if event.photo != nil {
-                ForEach(photos) { photo in
-                    if let url = URL(string: photo.imageURLString) {
-                        AsyncImage(url: url) { image in
-                            image
-                                .resizable()
-                                .scaledToFit()
-                                .padding()
-                        } placeholder: {
-                            ProgressView()
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                
+                // Hero image / photo section
+                Group {
+                    if event.photo != nil && !photos.isEmpty {
+                        TabView {
+                            ForEach(photos) { photo in
+                                if let url = URL(string: photo.imageURLString) {
+                                    AsyncImage(url: url) { image in
+                                        image
+                                            .resizable()
+                                            .scaledToFill()
+                                    } placeholder: {
+                                        ZStack {
+                                            Rectangle()
+                                                .fill(.thinMaterial)
+                                            ProgressView()
+                                        }
+                                    }
+                                } else {
+                                    ZStack {
+                                        Rectangle()
+                                            .fill(.thinMaterial)
+                                        Image(systemName: "photo")
+                                            .font(.largeTitle)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                }
+                            }
                         }
+                        .frame(height: 260)
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .tabViewStyle(.page)
                     } else {
-                        Image(systemName: "photo")
-                            .resizable()
-                            .scaledToFit()
-                            .padding()
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .fill(.thinMaterial)
+                                .frame(height: 220)
+                            
+                            VStack(spacing: 8) {
+                                Image(systemName: "photo.on.rectangle.angled")
+                                    .font(.system(size: 40, weight: .regular))
+                                    .foregroundStyle(.secondary)
+                                Text("No photo available")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
                     }
                 }
-            } else {
-                Image(systemName: "plus") //shows if there is no photo
-                    .resizable()
-                    .scaledToFit()
-                    .padding()
+                
+                // Title + type chip
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(event.name)
+                        .font(.title.bold())
+                        .foregroundStyle(.primary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    if let type = event.eventType {
+                        Text(type.rawValue)
+                            .font(.subheadline.weight(.semibold))
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(
+                                Capsule()
+                                    .fill(Color.blue.opacity(0.12))
+                            )
+                            .foregroundStyle(.blue)
+                    }
+                }
+                
+                // When section
+                GroupBox("When") {
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Image(systemName: "calendar")
+                            Text(startDateTimeText)
+                        }
+                        .font(.subheadline)
+                        
+                        Image(systemName: "arrow.down")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .padding(.vertical, 2)
+                        
+                        HStack {
+                            Image(systemName: "flag.checkered")
+                            Text(endDateTimeText)
+                        }
+                        .font(.subheadline)
+                    }
+                }
+                
+                // Description section
+                GroupBox("About this event") {
+                    if event.description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        Text("No description provided.")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Text(event.description)
+                            .font(.body)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+                
+                Spacer(minLength: 20)
             }
-            
-            Spacer()
-            
-            Text("Start Date:")
-                .font(.title2)
-                .bold()
-            Text("\(event.startDate)")
-            
-            Spacer()
-            
-            if event.startTime != nil {
-                Text("Start Time: \(event.startTime ?? Date())")
-            }
-            
-            Spacer()
-            
-            Text("End Date:")
-                .font(.title2)
-                .bold()
-            Text("\(event.endDate)")
-            
-            Spacer()
-            
-            if event.endTime != nil {
-                Text("End Time: \(event.endTime ?? Date())")
-            }
-            
-            Text("Event Description:")
-                .font(.title2)
-                .bold()
-            
-            Text(event.description)
-                .multilineTextAlignment(.leading)
-            
-            Spacer()
+            .padding()
         }
+        .navigationTitle("Event Details")
+        .navigationBarTitleDisplayMode(.inline)
         .task {
             $photos.path = "events/\(event.id ?? "")/photos"
-        }
-        .toolbar {
-            
-            ToolbarItem(placement: .confirmationAction) {
-                Button("Save", systemImage: "checkmark") {
-                    Task {
-                       let id = await EventViewModel.saveEvent(event: event)
-                        if id == nil {
-                            print("ERROR: Save on DetailView did not work")
-                        } else {
-                            dismiss()
-                        }
-                    }
-                    
-                    dismiss()
-                }
-            }
         }
     }
 }
