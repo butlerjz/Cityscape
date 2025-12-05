@@ -9,6 +9,7 @@
 # Example: if your keys are in "Secrets.swift", add that line below.
 # IMPORTANT: Keep backups of your secrets in a safe place!
 Secrets.swift
+GoogleService-Info.plist
 
 # PERSONAL XCODE SETTINGS
 # These store YOUR personal Xcode preferences - which files you had open,

@@ -32,7 +32,7 @@ struct DetailView: View {
                 
                 // Hero image / photo section
                 Group {
-                    if event.photo != nil && !photos.isEmpty {
+                    if !photos.isEmpty {
                         TabView {
                             ForEach(photos) { photo in
                                 if let url = URL(string: photo.imageURLString) {

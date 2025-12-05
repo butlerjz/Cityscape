@@ -13,7 +13,7 @@ import CoreLocation
 /// and returns the selected place via a callback
 struct PlaceSearchButton: View {
     
-    // MARK: - Properties
+    //Properties
     
     /// Text displayed on the button
     let buttonText: String
@@ -21,9 +21,8 @@ struct PlaceSearchButton: View {
     /// Callback when a place is successfully selected
     let onPlaceSelected: (PlaceResult) -> Void
     
-    // MARK: - State
+    //State
     
-    /// Controls visibility of the autocomplete sheet
     @State private var showAutocomplete = false
     
     /// Indicates when we're fetching place details
@@ -32,7 +31,7 @@ struct PlaceSearchButton: View {
     /// Stores any error message to display
     @State private var errorMessage: String?
     
-    // MARK: - Initialization
+    //Initialization
     
     /// Creates a new PlaceSearchButton
     /// - Parameters:
@@ -46,7 +45,7 @@ struct PlaceSearchButton: View {
         self.onPlaceSelected = onPlaceSelected
     }
     
-    // MARK: - Body
+    //Body
     
     var body: some View {
         Button {
@@ -82,12 +81,8 @@ struct PlaceSearchButton: View {
         }
     }
     
-    // MARK: - Private Methods
+    //Private Methods
     
-    /// Handles the selection of a place from autocomplete
-    /// - Parameters:
-    ///   - suggestion: The autocomplete suggestion selected by the user
-    ///   - token: Session token for billing purposes
     private func handlePlaceSelection(
         suggestion: AutocompletePlaceSuggestion,
         token: AutocompleteSessionToken
@@ -112,7 +107,7 @@ struct PlaceSearchButton: View {
             placeProperties: [
                 .displayName,       // The place's name
                 .formattedAddress,  // Full formatted address
-                .coordinate         // ✅ Request coordinates with .coordinate
+                .coordinate
             ],
             sessionToken: token
         )

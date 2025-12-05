@@ -10,12 +10,24 @@ import MapKit
 import FirebaseAuth
 import FirebaseFirestore
 
+enum ActiveSheet: Identifiable {
+    case bottom
+    case create
+    
+    var id: Int {
+        switch self {
+        case .bottom: return 0
+        case .create: return 1
+        }
+    }
+}
+
 struct MapView: View {
     
     @FirestoreQuery(collectionPath: "events") var events: [Event]
     @State private var defaultEnable = true
-    @State private var showBottomSheet = true
-    @State private var showCreateEventSheet = false
+    @State private var activeSheet: ActiveSheet? = .bottom
+    @State private var lastPresentedSheet: ActiveSheet? = .bottom
     @State private var bottomSheetDetent: PresentationDetent = .fraction(0.35)
     @State var locationManager = LocationManager()
     @State private var cameraPosition: MapCameraPosition = .userLocation(fallback: .automatic)
@@ -32,7 +44,6 @@ struct MapView: View {
                         
                         let coordinate = CLLocationCoordinate2D(latitude: event.latitude,
                                                                 longitude: event.longitude)
-                        
                         Marker(event.name,
                                systemImage: event.eventType?.iconName ?? "mappin.circle",
                                coordinate: coordinate)
@@ -61,8 +72,9 @@ struct MapView: View {
                     }
                     ToolbarItem(placement: .primaryAction) {
                         Button {
-                            showBottomSheet.toggle()
-                            showCreateEventSheet.toggle()
+                            // Open the create-event sheet
+                            activeSheet = .create
+                            lastPresentedSheet = .create
                         } label: {
                             Image(systemName: "plus.circle")
                         }
@@ -72,52 +84,63 @@ struct MapView: View {
             .navigationDestination(item: $selectedEvent) { event in
                 DetailView(event: event)
             }
-            .sheet(isPresented: $showBottomSheet) {
-                BottomSheetView(userLocation: locationManager.location?.coordinate) { event in
-                    let coord = CLLocationCoordinate2D(latitude: event.latitude,
-                                                       longitude: event.longitude)
-                    
-                    withAnimation {
-                        cameraPosition = .region(
-                            MKCoordinateRegion(
-                                center: coord,
-                                latitudinalMeters: 1000,    // adjust zoom as desired
-                                longitudinalMeters: 1000
-                            )
-                        )
-                    }
+            .sheet(item: $activeSheet, onDismiss: {
+                // When a sheet is dismissed, if it was the create sheet,
+                // restore the bottom sheet; if it was the bottom sheet,
+                // do nothing.
+                if lastPresentedSheet == .create {
+                    activeSheet = .bottom
+                    lastPresentedSheet = .bottom
                 }
-                // Heights: tweak these to match the feel you want
-                .presentationDetents(
-                    [.fraction(0.18), .fraction(0.35), .large],
-                    selection: $bottomSheetDetent
-                )
-                // Show the little drag indicator at the top
-                .presentationDragIndicator(.visible)
-                // Don't allow swiping down to fully dismiss
-                .interactiveDismissDisabled()
-                // Allow interacting with the content behind the sheet
-                .presentationBackgroundInteraction(.enabled)
-            }
-            .sheet(isPresented: $showCreateEventSheet, onDismiss: {
-                showCreateEventSheet.toggle()
-                showBottomSheet.toggle()
-            }) {
-                NavigationStack {
-                    CustomEventView(event: Event())
+            }) { sheet in
+                switch sheet {
+                case .bottom:
+                    BottomSheetView(userLocation: locationManager.location?.coordinate) { event in
+                        let coord = CLLocationCoordinate2D(latitude: event.latitude,
+                                                           longitude: event.longitude)
+                        
+                        withAnimation {
+                            cameraPosition = .region(
+                                MKCoordinateRegion(
+                                    center: coord,
+                                    latitudinalMeters: 1000,    // adjust zoom as desired
+                                    longitudinalMeters: 1000
+                                )
+                            )
+                        }
+                    }
+                    // Heights: tweak these to match the feel you want
+                    .presentationDetents(
+                        [.fraction(0.18), .fraction(0.35), .large],
+                        selection: $bottomSheetDetent
+                    )
+                    // Show the little drag indicator at the top
+                    .presentationDragIndicator(.visible)
+                    // Don't allow swiping down to fully dismiss
+                    .interactiveDismissDisabled()
+                    // Allow interacting with the content behind the sheet
+                    .presentationBackgroundInteraction(.enabled)
+                    
+                case .create:
+                    NavigationStack {
+                        CustomEventView(event: Event())
+                    }
                 }
             }
             .onChange(of: selectedEvent) { _, newValue in
                 if newValue != nil {
-                    // Navigated to DetailView, hide bottom sheet
-                    showBottomSheet = false
+                    // Navigated to DetailView, hide any sheet
+                    activeSheet = nil
                 } else {
-                    // Returned from DetailView, show bottom sheet again
-                    showBottomSheet = true
+                    // Returned from DetailView, restore the bottom sheet
+                    activeSheet = .bottom
+                    lastPresentedSheet = .bottom
                 }
             }
             .onAppear {
-                showBottomSheet = true
+                // Ensure the bottom sheet is visible on first load
+                activeSheet = .bottom
+                lastPresentedSheet = .bottom
                 }
             }
         }
@@ -165,7 +188,7 @@ struct BottomSheetView: View {
             
             HStack {
                 Image(systemName: "magnifyingglass")
-                TextField("Search for Event or Location", text: $searchText)
+                TextField("Search for Event", text: $searchText)
                     .foregroundColor(.secondary)
                 Spacer()
             }
