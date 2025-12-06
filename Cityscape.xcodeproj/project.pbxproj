@@ -293,6 +293,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Cityscape/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Cityscape;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Cityscape requires access to the device's location.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -326,6 +327,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Cityscape/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Cityscape;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Cityscape requires access to the device's location.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

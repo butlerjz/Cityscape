@@ -109,7 +109,6 @@ struct MapView: View {
                             )
                         }
                     }
-                    // Heights: tweak these to match the feel you want
                     .presentationDetents(
                         [.fraction(0.18), .fraction(0.35), .large],
                         selection: $bottomSheetDetent
@@ -129,10 +128,8 @@ struct MapView: View {
             }
             .onChange(of: selectedEvent) { _, newValue in
                 if newValue != nil {
-                    // Navigated to DetailView, hide any sheet
                     activeSheet = nil
                 } else {
-                    // Returned from DetailView, restore the bottom sheet
                     activeSheet = .bottom
                     lastPresentedSheet = .bottom
                 }
